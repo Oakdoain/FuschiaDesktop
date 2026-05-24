@@ -99,7 +99,6 @@ tracks/0/keys = {
 
 [sub_resource type="Animation" id="Animation_x3pxs"]
 resource_name = "Raised_Dynamic_Happy_Left"
-length = 0.7
 loop_mode = 1
 step = 0.1
 tracks/0/type = "value"
