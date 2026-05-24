@@ -136,3 +136,4 @@ position = Vector2(150, 150)
 shape = SubResource("RectangleShape2D_o7tcy")
 
 [node name="PopupMenu" type="PopupMenu" parent="." unique_id=2105332532]
+oversampling_override = 1.0
