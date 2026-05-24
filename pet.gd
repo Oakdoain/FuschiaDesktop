@@ -27,6 +27,12 @@ var current_body_scale := 0.6
 var current_language := "zh_CN"
 
 # =========================
+# 本地设置保存
+# =========================
+
+const SETTINGS_PATH := "user://settings.json"
+
+# =========================
 # 主菜单 ID
 # =========================
 
@@ -70,6 +76,129 @@ const LANGUAGE_EN := 303
 
 const SIZE_VALUES := [1.0, 0.8, 0.6, 0.4, 0.2]
 const OPACITY_VALUES := [1.0, 0.8, 0.6, 0.4, 0.2]
+
+# =========================
+# 多语言文本
+# =========================
+
+const TEXTS := {
+	"zh_CN": {
+		"menu_apps": "小程序",
+		"menu_settings": "设置",
+		"menu_language": "语言",
+		"menu_help": "帮助",
+		"menu_exit": "退出程序",
+
+		"app_status_timer": "状态计时器",
+		"app_pomodoro": "番茄钟",
+		"app_game_mode": "游戏模式",
+
+		"setting_personal": "个性化设置",
+		"setting_auto_start": "开机自启",
+		"setting_always_on_top": "置顶",
+		"setting_size": "窗口大小：",
+		"setting_opacity": "透明度：",
+		"setting_reset_position": "重置位置",
+		"setting_clear_cache": "删除缓存",
+		"setting_about": "关于应用",
+
+		"language_zh_cn": "简中",
+		"language_zh_tw": "繁中",
+		"language_en": "EN",
+
+		"title_feature": "功能预告",
+		"title_cache": "删除缓存",
+		"title_language": "语言",
+		"title_about": "关于应用",
+		"title_notice": "提示",
+
+		"status_timer_soon": "状态计时器将在后续版本开放。",
+		"pomodoro_soon": "番茄钟将在后续版本开放。",
+		"game_mode_soon": "游戏模式将在后续版本开放。",
+		"personal_soon": "个性化设置将在后续版本开放。",
+		"auto_start_soon": "开机自启将在后续版本开放。",
+		"cache_done": "缓存清理完成。",
+		"language_changed": "当前语音语言已设置为：简中。"
+	},
+
+	"zh_TW": {
+		"menu_apps": "小程式",
+		"menu_settings": "設定",
+		"menu_language": "語言",
+		"menu_help": "幫助",
+		"menu_exit": "退出程式",
+
+		"app_status_timer": "狀態計時器",
+		"app_pomodoro": "番茄鐘",
+		"app_game_mode": "遊戲模式",
+
+		"setting_personal": "個人化設定",
+		"setting_auto_start": "開機自啟",
+		"setting_always_on_top": "置頂",
+		"setting_size": "視窗大小：",
+		"setting_opacity": "透明度：",
+		"setting_reset_position": "重設位置",
+		"setting_clear_cache": "刪除快取",
+		"setting_about": "關於應用",
+
+		"language_zh_cn": "簡中",
+		"language_zh_tw": "繁中",
+		"language_en": "EN",
+
+		"title_feature": "功能預告",
+		"title_cache": "刪除快取",
+		"title_language": "語言",
+		"title_about": "關於應用",
+		"title_notice": "提示",
+
+		"status_timer_soon": "狀態計時器將在後續版本開放。",
+		"pomodoro_soon": "番茄鐘將在後續版本開放。",
+		"game_mode_soon": "遊戲模式將在後續版本開放。",
+		"personal_soon": "個人化設定將在後續版本開放。",
+		"auto_start_soon": "開機自啟將在後續版本開放。",
+		"cache_done": "快取清理完成。",
+		"language_changed": "當前語音語言已設定為：繁中。"
+	},
+
+	"en": {
+		"menu_apps": "Apps",
+		"menu_settings": "Settings",
+		"menu_language": "Language",
+		"menu_help": "Help",
+		"menu_exit": "Exit",
+
+		"app_status_timer": "Status Timer",
+		"app_pomodoro": "Pomodoro",
+		"app_game_mode": "Game Mode",
+
+		"setting_personal": "Personalization",
+		"setting_auto_start": "Launch on Startup",
+		"setting_always_on_top": "Always on Top",
+		"setting_size": "Window Size: ",
+		"setting_opacity": "Opacity: ",
+		"setting_reset_position": "Reset Position",
+		"setting_clear_cache": "Clear Cache",
+		"setting_about": "About",
+
+		"language_zh_cn": "Simplified Chinese",
+		"language_zh_tw": "Traditional Chinese",
+		"language_en": "English",
+
+		"title_feature": "Coming Soon",
+		"title_cache": "Clear Cache",
+		"title_language": "Language",
+		"title_about": "About",
+		"title_notice": "Notice",
+
+		"status_timer_soon": "Status Timer will be available in a future version.",
+		"pomodoro_soon": "Pomodoro will be available in a future version.",
+		"game_mode_soon": "Game Mode will be available in a future version.",
+		"personal_soon": "Personalization settings will be available in a future version.",
+		"auto_start_soon": "Launch on Startup will be available in a future version.",
+		"cache_done": "Cache cleared.",
+		"language_changed": "Voice language has been set to English."
+	}
+}
 
 # =========================
 # 节点引用
@@ -129,8 +258,7 @@ func _ready():
 	# 默认显示设置
 	# =========================
 
-	set_pet_size(0.6)
-	set_pet_opacity(1.0)
+	apply_default_settings()
 
 	# =========================
 	# 鼠标输入
@@ -142,17 +270,23 @@ func _ready():
 		pet_area.input_event.connect(_on_pet_area_input)
 
 	# =========================
+	# 弹窗
+	# =========================
+
+	setup_about_dialog()
+	setup_message_dialog()
+
+	# =========================
 	# 菜单
 	# =========================
 
 	setup_menu()
 
 	# =========================
-	# 弹窗
+	# 读取本地设置
 	# =========================
 
-	setup_about_dialog()
-	setup_message_dialog()
+	load_settings()
 
 	# =========================
 	# 动画完成信号
@@ -271,6 +405,24 @@ func _on_pet_area_input(_viewport, event, _shape_idx):
 				)
 
 # =========================
+# 多语言
+# =========================
+
+func t(key: String) -> String:
+
+	var lang_data: Dictionary = TEXTS.get(current_language, TEXTS["zh_CN"])
+
+	if lang_data.has(key):
+		return lang_data[key]
+
+	var fallback: Dictionary = TEXTS["zh_CN"]
+
+	if fallback.has(key):
+		return fallback[key]
+
+	return key
+
+# =========================
 # 菜单系统
 # =========================
 
@@ -282,14 +434,14 @@ func setup_menu():
 
 	popup_menu.clear()
 
-	popup_menu.add_submenu_item("小程序", "AppMenu")
-	popup_menu.add_submenu_item("设置", "SettingMenu")
-	popup_menu.add_submenu_item("语言", "LanguageMenu")
+	popup_menu.add_submenu_item(t("menu_apps"), "AppMenu")
+	popup_menu.add_submenu_item(t("menu_settings"), "SettingMenu")
+	popup_menu.add_submenu_item(t("menu_language"), "LanguageMenu")
 
 	popup_menu.add_separator()
 
-	popup_menu.add_item("帮助", MENU_HELP)
-	popup_menu.add_item("退出程序", MENU_EXIT)
+	popup_menu.add_item(t("menu_help"), MENU_HELP)
+	popup_menu.add_item(t("menu_exit"), MENU_EXIT)
 
 	if not popup_menu.id_pressed.is_connected(_on_menu_selected):
 		popup_menu.id_pressed.connect(_on_menu_selected)
@@ -300,9 +452,9 @@ func setup_menu():
 
 	app_menu.clear()
 
-	app_menu.add_item("状态计时器", APP_STATUS_TIMER)
-	app_menu.add_item("番茄钟", APP_POMODORO)
-	app_menu.add_item("游戏模式", APP_GAME_MODE)
+	app_menu.add_item(t("app_status_timer"), APP_STATUS_TIMER)
+	app_menu.add_item(t("app_pomodoro"), APP_POMODORO)
+	app_menu.add_item(t("app_game_mode"), APP_GAME_MODE)
 
 	if not app_menu.id_pressed.is_connected(_on_menu_selected):
 		app_menu.id_pressed.connect(_on_menu_selected)
@@ -313,12 +465,12 @@ func setup_menu():
 
 	setting_menu.clear()
 
-	setting_menu.add_item("个性化设置", SETTING_PERSONAL)
+	setting_menu.add_item(t("setting_personal"), SETTING_PERSONAL)
 
 	setting_menu.add_separator()
 
-	setting_menu.add_check_item("开机自启", SETTING_AUTO_START)
-	setting_menu.add_check_item("置顶", SETTING_ALWAYS_ON_TOP)
+	setting_menu.add_check_item(t("setting_auto_start"), SETTING_AUTO_START)
+	setting_menu.add_check_item(t("setting_always_on_top"), SETTING_ALWAYS_ON_TOP)
 
 	setting_menu.add_separator()
 
@@ -330,9 +482,9 @@ func setup_menu():
 
 	setting_menu.add_separator()
 
-	setting_menu.add_item("重置位置", SETTING_RESET_POSITION)
-	setting_menu.add_item("删除缓存", SETTING_CLEAR_CACHE)
-	setting_menu.add_item("关于应用", SETTING_ABOUT)
+	setting_menu.add_item(t("setting_reset_position"), SETTING_RESET_POSITION)
+	setting_menu.add_item(t("setting_clear_cache"), SETTING_CLEAR_CACHE)
+	setting_menu.add_item(t("setting_about"), SETTING_ABOUT)
 
 	if not setting_menu.id_pressed.is_connected(_on_menu_selected):
 		setting_menu.id_pressed.connect(_on_menu_selected)
@@ -343,9 +495,9 @@ func setup_menu():
 
 	language_menu.clear()
 
-	language_menu.add_check_item("简中", LANGUAGE_ZH_CN)
-	language_menu.add_check_item("繁中", LANGUAGE_ZH_TW)
-	language_menu.add_check_item("EN", LANGUAGE_EN)
+	language_menu.add_check_item(t("language_zh_cn"), LANGUAGE_ZH_CN)
+	language_menu.add_check_item(t("language_zh_tw"), LANGUAGE_ZH_TW)
+	language_menu.add_check_item(t("language_en"), LANGUAGE_EN)
 
 	if not language_menu.id_pressed.is_connected(_on_menu_selected):
 		language_menu.id_pressed.connect(_on_menu_selected)
@@ -371,23 +523,23 @@ func _on_menu_selected(id):
 		# =========================
 
 		APP_STATUS_TIMER:
-			show_feature_placeholder("状态计时器将在后续版本开放。")
+			show_feature_placeholder("status_timer_soon")
 
 		APP_POMODORO:
-			show_feature_placeholder("番茄钟将在后续版本开放。")
+			show_feature_placeholder("pomodoro_soon")
 
 		APP_GAME_MODE:
-			show_feature_placeholder("游戏模式将在后续版本开放。")
+			show_feature_placeholder("game_mode_soon")
 
 		# =========================
 		# 设置
 		# =========================
 
 		SETTING_PERSONAL:
-			show_feature_placeholder("个性化设置将在后续版本开放。")
+			show_feature_placeholder("personal_soon")
 
 		SETTING_AUTO_START:
-			show_feature_placeholder("开机自启将在后续版本开放。")
+			show_feature_placeholder("auto_start_soon")
 
 		SETTING_ALWAYS_ON_TOP:
 			toggle_always_on_top()
@@ -463,6 +615,110 @@ func _set_menu_text(menu: PopupMenu, id: int, text: String):
 		menu.set_item_text(index, text)
 
 # =========================
+# 本地设置保存 / 读取
+# =========================
+
+func apply_default_settings():
+
+	is_always_on_top = false
+	current_opacity = 1.0
+	current_body_scale = 0.6
+	current_language = "zh_CN"
+
+	DisplayServer.window_set_flag(
+		DisplayServer.WINDOW_FLAG_ALWAYS_ON_TOP,
+		is_always_on_top
+	)
+
+	set_pet_size(current_body_scale, false)
+	set_pet_opacity(current_opacity, false)
+
+func save_settings():
+
+	var window_pos := DisplayServer.window_get_position()
+
+	var settings := {
+		"window_position": {
+			"x": window_pos.x,
+			"y": window_pos.y
+		},
+		"body_scale": current_body_scale,
+		"opacity": current_opacity,
+		"always_on_top": is_always_on_top,
+		"language": current_language
+	}
+
+	var file := FileAccess.open(SETTINGS_PATH, FileAccess.WRITE)
+
+	if file == null:
+		push_warning("Failed to save settings: " + SETTINGS_PATH)
+		return
+
+	var json_text := JSON.stringify(settings, "\t")
+
+	file.store_string(json_text)
+	file.close()
+
+func load_settings():
+
+	if not FileAccess.file_exists(SETTINGS_PATH):
+		return
+
+	var file := FileAccess.open(SETTINGS_PATH, FileAccess.READ)
+
+	if file == null:
+		push_warning("Failed to load settings: " + SETTINGS_PATH)
+		return
+
+	var json_text := file.get_as_text()
+	file.close()
+
+	var json := JSON.new()
+	var error := json.parse(json_text)
+
+	if error != OK:
+		push_warning("Failed to parse settings.json")
+		return
+
+	var settings = json.data
+
+	if typeof(settings) != TYPE_DICTIONARY:
+		push_warning("settings.json is not a Dictionary")
+		return
+
+	if settings.has("always_on_top"):
+		is_always_on_top = bool(settings["always_on_top"])
+
+		DisplayServer.window_set_flag(
+			DisplayServer.WINDOW_FLAG_ALWAYS_ON_TOP,
+			is_always_on_top
+		)
+
+	if settings.has("opacity"):
+		set_pet_opacity(float(settings["opacity"]), false)
+
+	if settings.has("body_scale"):
+		set_pet_size(float(settings["body_scale"]), false)
+
+	if settings.has("language"):
+		current_language = str(settings["language"])
+		setup_menu()
+
+	if settings.has("window_position"):
+		var pos_data = settings["window_position"]
+
+		if typeof(pos_data) == TYPE_DICTIONARY and pos_data.has("x") and pos_data.has("y"):
+
+			DisplayServer.window_set_position(
+				Vector2i(
+					int(pos_data["x"]),
+					int(pos_data["y"])
+				)
+			)
+
+	update_menu_checks()
+
+# =========================
 # 菜单功能
 # =========================
 
@@ -476,8 +732,9 @@ func toggle_always_on_top():
 	)
 
 	update_menu_checks()
+	save_settings()
 
-func set_pet_opacity(value: float):
+func set_pet_opacity(value: float, should_save := true):
 
 	current_opacity = value
 
@@ -485,7 +742,10 @@ func set_pet_opacity(value: float):
 
 	update_menu_checks()
 
-func set_pet_size(value: float):
+	if should_save:
+		save_settings()
+
+func set_pet_size(value: float, should_save := true):
 
 	current_body_scale = value
 
@@ -514,6 +774,9 @@ func set_pet_size(value: float):
 
 	update_menu_checks()
 
+	if should_save:
+		save_settings()
+
 func cycle_pet_size():
 
 	var current_index := SIZE_VALUES.find(current_body_scale)
@@ -538,11 +801,11 @@ func cycle_pet_opacity():
 
 func get_size_menu_text() -> String:
 
-	return "窗口大小：" + get_option_row_text(SIZE_VALUES, current_body_scale)
+	return t("setting_size") + get_option_row_text(SIZE_VALUES, current_body_scale)
 
 func get_opacity_menu_text() -> String:
 
-	return "透明度：" + get_option_row_text(OPACITY_VALUES, current_opacity)
+	return t("setting_opacity") + get_option_row_text(OPACITY_VALUES, current_opacity)
 
 func get_option_row_text(values: Array, current_value: float) -> String:
 
@@ -578,10 +841,14 @@ func reset_window_position():
 
 	DisplayServer.window_set_position(target_pos)
 
+	save_settings()
+
 func request_exit():
 
 	if is_shutting_down:
 		return
+
+	save_settings()
 
 	is_shutting_down = true
 	can_interact = false
@@ -598,29 +865,28 @@ func open_help_page():
 
 	OS.shell_open("https://fuschiadigital.cn")
 
-func show_feature_placeholder(message: String):
+func show_feature_placeholder(message_key: String):
 
 	show_message(
-		"功能预告",
-		message
+		t("title_feature"),
+		t(message_key)
 	)
 
-func set_language(language_code: String):
+func set_language(language_code: String, should_save := true, show_notice := true):
 
 	current_language = language_code
 
+	setup_menu()
 	update_menu_checks()
 
-	match language_code:
+	if should_save:
+		save_settings()
 
-		"zh_CN":
-			show_message("语言", "当前语音语言已设置为：简中。")
-
-		"zh_TW":
-			show_message("語言", "當前語音語言已設定為：繁中。")
-
-		"en":
-			show_message("Language", "Voice language has been set to English.")
+	if show_notice:
+		show_message(
+			t("title_language"),
+			t("language_changed")
+		)
 
 func clear_cache():
 
@@ -631,8 +897,8 @@ func clear_cache():
 		DirAccess.remove_absolute(cache_path)
 
 	show_message(
-		"删除缓存",
-		"缓存清理完成。"
+		t("title_cache"),
+		t("cache_done")
 	)
 
 func _delete_directory_recursive(path: String):
@@ -672,7 +938,7 @@ func _delete_directory_recursive(path: String):
 func setup_message_dialog():
 
 	message_dialog = AcceptDialog.new()
-	message_dialog.title = "提示"
+	message_dialog.title = t("title_notice")
 	message_dialog.min_size = Vector2i(320, 180)
 	add_child(message_dialog)
 
@@ -700,7 +966,7 @@ func show_message(title: String, message: String):
 func setup_about_dialog():
 
 	about_dialog = AcceptDialog.new()
-	about_dialog.title = "关于应用"
+	about_dialog.title = t("title_about")
 	about_dialog.min_size = Vector2i(360, 220)
 	add_child(about_dialog)
 
@@ -714,6 +980,8 @@ func setup_about_dialog():
 	about_dialog.add_child(about_label)
 
 func show_about():
+
+	about_dialog.title = t("title_about")
 
 	about_dialog.popup_centered(
 		Vector2i(360, 220)
@@ -739,6 +1007,9 @@ func _on_animation_finished(anim_name: StringName):
 # =========================
 
 func stop_drag():
+
+	if is_dragging:
+		save_settings()
 
 	is_dragging = false
 
