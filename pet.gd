@@ -1,157 +1,79 @@
 extends Node2D
 
-# =========================
-# 拖拽状态
-# =========================
+var is_dragging := false
+var current_anim := ""
 
-var is_dragging = false
-var drag_offset = Vector2.ZERO
-var current_anim = ""
-
-# =========================
-# 初始化
-# =========================
+@onready var pet_sprite: Sprite2D = $PetSprite
+@onready var anim_player: AnimationPlayer = $PetSprite/AnimationPlayer
+@onready var grab_point: Marker2D = $PetSprite/GrabPoint
+@onready var pet_area: Area2D = $PetArea
+@onready var popup_menu: PopupMenu = $PopupMenu
 
 func _ready():
-
-	# ===== 窗口设置 =====
-
-	# 无边框
-	DisplayServer.window_set_flag(
-		DisplayServer.WINDOW_FLAG_BORDERLESS,
-		true
-	)
-
-	# 固定窗口大小
+	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_BORDERLESS, true)
 	DisplayServer.window_set_size(Vector2i(300, 300))
-
-	# ===== 默认动画 =====
 
 	play_anim("Default_Happy_1")
 
-	# ===== 鼠标输入 =====
+	pet_area.input_pickable = true
+	pet_area.input_event.connect(_on_pet_area_input)
 
-	$PetArea.input_pickable = true
-	$PetArea.connect("input_event", _on_input)
-
-	# ===== 右键菜单 =====
-
-	$PopupMenu.add_item("退出", 0)
-	$PopupMenu.id_pressed.connect(_on_menu_selected)
-
-# =========================
-# 每帧更新
-# =========================
+	popup_menu.clear()
+	popup_menu.add_item("退出", 0)
+	popup_menu.id_pressed.connect(_on_menu_selected)
 
 func _process(_delta):
-
 	if is_dragging:
+		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			stop_drag()
+			return
 
-		# 桌面鼠标坐标
-		var mouse_pos = Vector2(
-			DisplayServer.mouse_get_position()
-		)
+		var mouse_screen := Vector2(DisplayServer.mouse_get_position())
 
-		# 移动窗口
-		DisplayServer.window_set_position(
-			Vector2i(mouse_pos - drag_offset)
-		)
+		# GrabPoint 在窗口内部的真实坐标，自动包含 PetSprite 的 position / scale
+		var grab_in_window := pet_sprite.to_global(grab_point.position)
 
-		# ===== 左右拖动动画 =====
+		# 让 GrabPoint 精准吸附到鼠标
+		var target_window_pos := mouse_screen - grab_in_window
+		DisplayServer.window_set_position(Vector2i(target_window_pos))
 
-		var win_pos = DisplayServer.window_get_position()
+		var window_pos := DisplayServer.window_get_position()
+		var center_x := window_pos.x + 150
 
-		var center_x = win_pos.x + 150
-
-		if mouse_pos.x > center_x:
-
+		if mouse_screen.x > center_x:
 			play_anim("Raised_Dynamic_Happy_Right")
-
 		else:
-
 			play_anim("Raised_Dynamic_Happy_Left")
 
-# =========================
-# 鼠标输入
-# =========================
-
-func _on_input(_viewport, event, _shape_idx):
-
+func _input(event):
 	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and not event.pressed and is_dragging:
+			stop_drag()
 
-		# =========================
-		# 左键拖动
-		# =========================
+func _on_pet_area_input(_viewport, event, _shape_idx):
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			is_dragging = true
 
-		if event.button_index == MOUSE_BUTTON_LEFT:
+		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			is_dragging = false
+			play_anim("Default_Happy_1")
 
-			if event.pressed:
+			var mouse_screen := DisplayServer.mouse_get_position()
+			popup_menu.popup(Rect2i(mouse_screen, Vector2i(1, 1)))
 
-				is_dragging = true
-
-				# 桌面鼠标坐标
-				var mouse_pos = Vector2(
-					DisplayServer.mouse_get_position()
-				)
-
-				# 窗口左上角
-				var win_pos = Vector2(
-					DisplayServer.window_get_position()
-				)
-
-				# PetSprite 在窗口中的位置
-				var sprite_pos = $PetSprite.position
-
-				# GrabPoint 在 Sprite 中的位置
-				var grab_local = $PetSprite/GrabPoint.position
-
-				# GrabPoint 在窗口中的真实位置
-				var grab_in_window = sprite_pos + grab_local
-
-				# GrabPoint 在桌面中的真实位置
-				var grab_screen = win_pos + grab_in_window
-
-				# 鼠标偏移
-				drag_offset = mouse_pos - grab_screen
-
-			else:
-
-				is_dragging = false
-
-				play_anim("Default_Happy_1")
-
-		# =========================
-		# 右键菜单
-		# =========================
-
-		if event.button_index == MOUSE_BUTTON_RIGHT:
-
-			if event.pressed:
-
-				$PopupMenu.position = get_viewport().get_mouse_position()
-
-				$PopupMenu.popup()
-
-# =========================
-# 菜单事件
-# =========================
+func stop_drag():
+	is_dragging = false
+	play_anim("Default_Happy_1")
 
 func _on_menu_selected(id):
-
 	match id:
-
 		0:
 			get_tree().quit()
 
-# =========================
-# 动画播放
-# =========================
-
-func play_anim(anim_name):
-
+func play_anim(anim_name: String):
 	if current_anim == anim_name:
 		return
 
 	current_anim = anim_name
-
-	$PetSprite/AnimationPlayer.play(anim_name)
+	anim_player.play(anim_name)

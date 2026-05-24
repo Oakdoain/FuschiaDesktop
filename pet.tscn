@@ -36,36 +36,6 @@
 [ext_resource type="Texture2D" uid="uid://buvj3p6oktnd0" path="res://vup/Raise/Raised_Dynamic/Happy/H提起狗刨向右_010_125.png" id="25_b1pwk"]
 [ext_resource type="Texture2D" uid="uid://lnl31oimeq87" path="res://vup/Raise/Raised_Dynamic/Happy/H提起狗刨向左_021_125.png" id="25_x7uf5"]
 
-[sub_resource type="GDScript" id="GDScript_b1pwk"]
-script/source = "extends Node2D
-
-# 拖动状态
-var is_dragging = false
-var drag_offset = Vector2.ZERO
-
-func _ready():
-	# 启动时默认播放动画
-	$AnimationPlayer.play(\"Default_Happy_1\")
-
-func _input_event(viewport, event, shape_idx):
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			if event.pressed:
-				# 鼠标按下，开始拖动
-				is_dragging = true
-				drag_offset = get_global_mouse_position() - global_position
-				$AnimationPlayer.play(\"Raised_Dynamic_Happy_Right\")
-			else:
-				# 鼠标松开，停止拖动
-				is_dragging = false
-				$AnimationPlayer.play(\"Default_Happy_1\")
-
-func _process(delta):
-	if is_dragging:
-		# 拖动时更新位置
-		global_position = get_global_mouse_position() - drag_offset
-"
-
 [sub_resource type="Animation" id="Animation_o7tcy"]
 resource_name = "Default_Happy_1"
 length = 1.2000101
@@ -152,7 +122,6 @@ script = ExtResource("1_o7tcy")
 position = Vector2(150, 150)
 scale = Vector2(0.30000004, 0.30000004)
 texture = ExtResource("1_6e2du")
-script = SubResource("GDScript_b1pwk")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="PetSprite" unique_id=435714093]
 libraries/ = SubResource("AnimationLibrary_slpjv")
