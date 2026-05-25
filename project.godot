@@ -13,6 +13,10 @@ config_version=5
 config/name="desktop"
 run/main_scene="uid://csxs1r6vlc7cb"
 config/features=PackedStringArray("4.6", "GL Compatibility")
+boot_splash/bg_color=Color(0.14117648, 0.14117648, 0.14117648, 0)
+boot_splash/show_image=false
+boot_splash/stretch_mode=0
+boot_splash/use_filter=false
 config/icon="res://icon.svg"
 
 [display]
@@ -34,3 +38,5 @@ window/per_pixel_transparency/allowed=true
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.3019608, 0.3019608, 0.3019608, 0)
+viewport/transparent_background=true
