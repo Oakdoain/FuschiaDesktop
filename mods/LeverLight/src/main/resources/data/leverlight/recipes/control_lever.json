@@ -1,0 +1,5 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{"item": "minecraft:lever"}],
+  "result": {"item": "leverlight:control_lever", "count": 1}
+}
